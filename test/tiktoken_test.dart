@@ -474,6 +474,78 @@ void main() {
       expect(gpt4o.encode('Hello, world!'), [13225, 11, 2375, 0]);
       expect(gpt4o.count('Hello, world!'), 4);
     });
+
+    test('Contractions like \'t \'re and \'ll, with different casing.', () {
+      //
+      var text = "I don't know why WE'RE GOING, but I'Ll go anyway.";
+
+      expect(gpt4.encode(text), [
+        40,
+        1541,
+        956,
+        1440,
+        3249,
+        20255,
+        95253,
+        12890,
+        1753,
+        11,
+        719,
+        358,
+        92526,
+        75,
+        733,
+        13971,
+        13
+      ]);
+
+      expect(gpt4o.encode(text), [
+        40,
+        4128,
+        1761,
+        4436,
+        26919,
+        6,
+        1099,
+        22136,
+        2694,
+        11,
+        889,
+        3413,
+        141022,
+        810,
+        22332,
+        13
+      ]);
+    });
+
+    test('Contractions like \'t \'re and \'ll, with different casing.', () {
+      //
+      // Sequences with special characters that test backtracking.
+      expect(gpt4.encode("@Word!123"), [31, 11116, 0, 4513]);
+      expect(gpt4.encode('#include'), [1085]);
+      expect(gpt4.encode('\$array'), [63761]);
+      expect(gpt4.encode('@media'), [85063]);
+
+      // ---
+
+      // Multiple contractions in sequence
+      var text = "I'll've done";
+      expect(gpt4.encode(text), [40, 3358, 3077, 2884]);
+      expect(gpt4o.encode(text), [67504, 7341, 4167]);
+
+      // ---
+
+      // Mixed case sequences with possessive vs non-possessive matching.
+      text = "ABCdef123";
+      expect(gpt4.encode(text), [26484, 755, 4513]);
+      expect(gpt4o.encode(text), [44197, 1314, 7633]);
+    });
+
+    test('Contractions like \'t \'re and \'ll, with different casing.', () {
+      var text = "abc123def";
+      expect(gpt4.encode(text), [13997, 4513, 755]);
+    });
   });
 
   group('Words', () {

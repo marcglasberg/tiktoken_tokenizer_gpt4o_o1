@@ -34,20 +34,11 @@ import 'ranks/o200k_base/o200k_base_7.dart';
 import 'ranks/o200k_base/o200k_base_8.dart';
 import 'ranks/o200k_base/o200k_base_9.dart';
 
-// ignore: constant_identifier_names
-const ENDOFTEXT = "<|endoftext|>";
-
-// ignore: constant_identifier_names
+const END_OF_TEXT = "<|endoftext|>";
 const FIM_PREFIX = "<|fim_prefix|>";
-
-// ignore: constant_identifier_names
 const FIM_MIDDLE = "<|fim_middle|>";
-
-// ignore: constant_identifier_names
 const FIM_SUFFIX = "<|fim_suffix|>";
-
-// ignore: constant_identifier_names
-const ENDOFPROMPT = "<|endofprompt|>";
+const END_OF_PROMPT = "<|endofprompt|>";
 
 class CoreBPEConstructor {
   const CoreBPEConstructor._({
@@ -61,6 +52,76 @@ class CoreBPEConstructor {
   static final Map<String, int> _cl100kBase = {};
   static final Map<String, int> _o200kBase = {};
 
+  /// This is the original Python regex:
+  /// r"""'(?i:[sdmt]|ll|ve|re)|[^\r\n\p{L}\p{N}]?+\p{L}++|\p{N}{1,3}+| ?[^\s\p{L}\p{N}]++[\r\n]*+|\s++$|\s*[\r\n]|\s+(?!\S)|\s"""
+  ///
+  /// We cannot replicate this exactly in Dart because the Dart regex engine
+  /// (based on JavaScript's regex engine) does not support possessive quantifiers,
+  /// like, for example, `*+`, `++` etc. However, Clause thinks it doesn't make any
+  /// difference, because: `Even though \p{L}+ can backtrack, there's nothing "competing"
+  /// for those letters after it in the pattern. The pattern just says: - Optionally
+  /// match one non-letter/non-number. - Then match as many letters as possible. There's
+  /// no condition after the letters that would make us want to backtrack and match them
+  /// differently. Whether it's possessive \p{L}++ or regular \p{L}+, it will always grab
+  /// all the consecutive letters it can find because that's the only way to make a valid
+  /// match. This is different from patterns like \w+\d+ vs \w++\d+ trying to
+  /// match "abc123", where backtracking might matter because both \w and \d could match
+  /// numbers. In our tiktoken regex, each part of the pattern matches mutually exclusive
+  /// character types`.
+  static const cl100kBase1_Regex =
+      r"('s|'S|'t|'T|'re|'RE|'rE|'Re|'ve|'VE|'vE|'Ve|'m|'M|'ll|'LL|'Ll|'lL|'d|'D)"
+      r"|[^\r\n\p{L}\p{N}]?\p{L}+|\p{N}{1,3}| ?[^\s\p{L}\p{N}]+[\r\n]*|\s*[\r\n]+|\s+(?!\S)|\s+";
+
+  /// This is the original Python regex:
+  /// "|".join(
+  ///   [r"""[^\r\n\p{L}\p{N}]?[\p{Lu}\p{Lt}\p{Lm}\p{Lo}\p{M}]*[\p{Ll}\p{Lm}\p{Lo}\p{M}]+(?i:'s|'t|'re|'ve|'m|'ll|'d)?""",
+  ///   r"""[^\r\n\p{L}\p{N}]?[\p{Lu}\p{Lt}\p{Lm}\p{Lo}\p{M}]+[\p{Ll}\p{Lm}\p{Lo}\p{M}]*(?i:'s|'t|'re|'ve|'m|'ll|'d)?""",
+  ///   r"""\p{N}{1,3}""",
+  ///   r""" ?[^\s\p{L}\p{N}]+[\r\n/]*""",
+  ///   r"""\s*[\r\n]+""",
+  ///   r"""\s+(?!\S)""",
+  ///   r"""\s+""", ]
+  static const o200kBase_Regex =
+      // Match optional non-letter/number character, followed by uppercase or
+      // titlecase letters and ending in lowercase letters or marks. Optionally match
+      // contractions ('s, 've, etc.) in both lower and uppercase forms.
+      r"[^\r\n\p{L}\p{N}]?[\p{Lu}\p{Lt}\p{Lm}\p{Lo}\p{M}]*[\p{Ll}\p{Lm}\p{Lo}\p{M}]+('s|'S|'t|'T|'re|'RE|'rE|'Re|'ve|'VE|'vE|'Ve|'m|'M|'ll|'LL|'Ll|'lL|'d|'D)?"
+      r"|"
+
+      // Same as the previous line but ensures that the first letter(s) of the word is
+      // uppercase or titlecase and optionally followed by lowercase letters or marks.
+      r"[^\r\n\p{L}\p{N}]?[\p{Lu}\p{Lt}\p{Lm}\p{Lo}\p{M}]+[\p{Ll}\p{Lm}\p{Lo}\p{M}]*('s|'S|'t|'T|'re|'RE|'rE|'Re|'ve|'VE|'vE|'Ve|'m|'M|'ll|'LL|'Ll|'lL|'d|'D)?"
+      r"|"
+
+      // Match 1 to 3 digit numbers.
+      r"\p{N}{1,3}"
+      r"|"
+
+      // Match an optional space followed by one or more non-whitespace, non-letter,
+      // non-number characters, then zero or more newline characters or slashes.
+      r" ?[^\s\p{L}\p{N}]+[\r\n/]*"
+      r"|"
+
+      // Match zero or more whitespace characters followed by one or more newline
+      // characters.
+      r"\s*[\r\n]+"
+      r"|"
+
+      // Match one or more whitespace characters that are not followed by a
+      // non-whitespace character (i.e., trailing spaces).
+      r"\s+(?!\S)"
+      r"|"
+
+      // Match one or more whitespace characters.
+      r"\s+";
+
+  /// Taken from:
+  /// https://github.com/openai/tiktoken/blob/main/tiktoken_ext/openai_public.py
+  ///
+  /// The maps [cl100kBase1], [cl100kBase2] etc where generated from
+  /// "https://openaipublic.blob.core.windows.net/encodings/cl100k_base.tiktoken",
+  /// using the PowerShell commands explained in the README.md.
+  ///
   factory CoreBPEConstructor.cl100kBase() {
     //
     if (_cl100kBase.isEmpty) {
@@ -80,24 +141,17 @@ class CoreBPEConstructor {
     assert(_cl100kBase.length == 100256);
 
     return CoreBPEConstructor._(
-      name: "cl100k_base",
-      //
-      // We cannot replicate this exactly in Dart because the Dart regex engine
-      // (based on JavaScript's regex engine) does not support possessive quantifiers,
-      // like, for example, `*+`, `++` etc. The only way to fix this would be to remove
-      // the use of Regex, and replace it with a custom implementation to split the text.
-      patternStr:
-          r"('s|'S|'t|'T|'re|'RE|'rE|'Re|'ve|'VE|'vE|'Ve|'m|'M|'ll|'LL|'Ll|'lL|'d|'D)"
-          r"|[^\r\n\p{L}\p{N}]?\p{L}+|\p{N}{1,3}| ?[^\s\p{L}\p{N}]+[\r\n]*|\s*[\r\n]+|\s+(?!\S)|\s+",
+      name: 'cl100k_base',
+      patternStr: cl100kBase1_Regex,
       mergeableRanks: _cl100kBase.map(
         (k, v) => MapEntry(ByteArray.fromList(base64Decode(k)), v),
       ),
       specialTokens: {
-        ENDOFTEXT: 100257,
+        END_OF_TEXT: 100257,
         FIM_PREFIX: 100258,
         FIM_MIDDLE: 100259,
         FIM_SUFFIX: 100260,
-        ENDOFPROMPT: 100276,
+        END_OF_PROMPT: 100276,
       },
     );
   }
@@ -137,41 +191,14 @@ class CoreBPEConstructor {
     assert(_o200kBase.length == 199998);
 
     return CoreBPEConstructor._(
-      name: "o200k_base",
-      patternStr: [
-        // Match optional non-letter/number character, followed by uppercase or
-        // titlecase letters and ending in lowercase letters or marks. Optionally match
-        // contractions ('s, 've, etc.) in both lower and uppercase forms.
-        r"[^\r\n\p{L}\p{N}]?[\p{Lu}\p{Lt}\p{Lm}\p{Lo}\p{M}]*[\p{Ll}\p{Lm}\p{Lo}\p{M}]+('s|'S|'t|'T|'re|'RE|'rE|'Re|'ve|'VE|'vE|'Ve|'m|'M|'ll|'LL|'Ll|'lL|'d|'D)?",
-
-        // Same as the previous line but ensures that the first letter(s) of the word is
-        // uppercase or titlecase and optionally followed by lowercase letters or marks.
-        r"[^\r\n\p{L}\p{N}]?[\p{Lu}\p{Lt}\p{Lm}\p{Lo}\p{M}]+[\p{Ll}\p{Lm}\p{Lo}\p{M}]*('s|'S|'t|'T|'re|'RE|'rE|'Re|'ve|'VE|'vE|'Ve|'m|'M|'ll|'LL|'Ll|'lL|'d|'D)?",
-
-        // Match 1 to 3 digit numbers.
-        r"\p{N}{1,3}",
-
-        // Match an optional space followed by one or more non-whitespace, non-letter,
-        // non-number characters, then zero or more newline characters or slashes.
-        r" ?[^\s\p{L}\p{N}]+[\r\n/]*",
-
-        // Match zero or more whitespace characters followed by one or more newline
-        // characters.
-        r"\s*[\r\n]+",
-
-        // Match one or more whitespace characters that are not followed by a
-        // non-whitespace character (i.e., trailing spaces).
-        r"\s+(?!\S)",
-
-        // Match one or more whitespace characters.
-        r"\s+"
-      ].join("|"),
+      name: 'o200k_base',
+      patternStr: o200kBase_Regex,
       mergeableRanks: _o200kBase.map(
         (k, v) => MapEntry(ByteArray.fromList(base64Decode(k)), v),
       ),
       specialTokens: {
-        ENDOFTEXT: 199999,
-        ENDOFPROMPT: 200018,
+        END_OF_TEXT: 199999,
+        END_OF_PROMPT: 200018,
       },
     );
   }
