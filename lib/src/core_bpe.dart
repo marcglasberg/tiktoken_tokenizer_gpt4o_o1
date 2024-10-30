@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'common/byte_array.dart';
-import 'common/tuple2.dart';
 import 'common/utils.dart' as util;
 import 'error/tiktoken_error.dart';
 
@@ -89,7 +88,7 @@ class CoreBPE {
     return Uint32List.fromList(tokens);
   }
 
-  Tuple2<Uint32List, int> encodeNative(
+  _Tuple2<Uint32List, int> encodeNative(
     String text,
     Set<String> allowedSpecial,
   ) {
@@ -139,10 +138,10 @@ class CoreBPE {
       }
     }
 
-    return Tuple2(Uint32List.fromList(tokens), lastPieceTokenLen);
+    return _Tuple2(Uint32List.fromList(tokens), lastPieceTokenLen);
   }
 
-  Tuple2<List<int>, Set<List<int>>> encodeUnstableNative(
+  _Tuple2<List<int>, Set<List<int>>> encodeUnstableNative(
     String text,
     Set<String> allowedSpecial,
   ) {
@@ -150,7 +149,7 @@ class CoreBPE {
     var tokens = [...result.i1];
     var lastPieceTokenLen = result.i2;
 
-    if (lastPieceTokenLen == 0) return Tuple2(tokens, {});
+    if (lastPieceTokenLen == 0) return _Tuple2(tokens, {});
 
     var increasedLastPieceTokenLen =
         _increaseLastPieceTokenLen(tokens, lastPieceTokenLen);
@@ -166,7 +165,7 @@ class CoreBPE {
       hashCode: Object.hashAll,
     );
 
-    if (unstableBytes.isEmpty) return Tuple2(tokens, completions);
+    if (unstableBytes.isEmpty) return _Tuple2(tokens, completions);
 
     var point = sortedTokenBytes.partitionPoint((p0) => p0 < unstableBytes);
     while (point < sortedTokenBytes.length &&
@@ -223,7 +222,7 @@ class CoreBPE {
       }
     }
 
-    return Tuple2(tokens, completions);
+    return _Tuple2(tokens, completions);
   }
 
   ByteArray decodeNative(List<int> tokens) {
@@ -246,7 +245,7 @@ class CoreBPE {
     }
   }
 
-  Tuple2<List<int>, int> _increaseLastPieceTokenLen(
+  _Tuple2<List<int>, int> _increaseLastPieceTokenLen(
     List<int> tokens,
     int lastPieceTokenLen,
   ) {
@@ -266,7 +265,7 @@ class CoreBPE {
     }
     assert(lastPieceTokenLen <= tokens.length);
 
-    return Tuple2(tokens, lastPieceTokenLen);
+    return _Tuple2(tokens, lastPieceTokenLen);
   }
 
   List<Uint8List> tokenByteValues() {
@@ -296,44 +295,58 @@ const _whitespaces = {
 bool isWhitespace(String? c) => c != null && _whitespaces.contains(c);
 
 /// UTF-8 decode a single Unicode scalar value from the end of a slice.
-Tuple2<String?, int> decodeLastUtf8(List<int> slice) {
-  if (slice.isEmpty) return const Tuple2(null, 0);
+_Tuple2<String?, int> decodeLastUtf8(List<int> slice) {
+  if (slice.isEmpty) return const _Tuple2(null, 0);
 
   int i = slice.length - 1;
   while (i >= 0 && (slice[i] & 0xC0) == 0x80) {
     i--;
   }
 
-  if (i < 0) return Tuple2(null, slice.length);
+  if (i < 0) return _Tuple2(null, slice.length);
 
   int b = slice[i];
   int n = slice.length - i;
 
   if ((b & 0x80) == 0) {
-    // ASCII character
-    return Tuple2(String.fromCharCode(b), n);
+    // ASCII character.
+    return _Tuple2(String.fromCharCode(b), n);
   } else if ((b & 0xE0) == 0xC0 && n >= 2) {
-    // 2-byte sequence
+    // 2-byte sequence.
     int c = ((b & 0x1F) << 6) | (slice[i + 1] & 0x3F);
 
-    return Tuple2(String.fromCharCode(c), n);
+    return _Tuple2(String.fromCharCode(c), n);
   } else if ((b & 0xF0) == 0xE0 && n >= 3) {
-    // 3-byte sequence
+    // 3-byte sequence.
     int c = ((b & 0x0F) << 12) | ((slice[i + 1] & 0x3F) << 6) | (slice[i + 2] & 0x3F);
     if (c >= 0x0800 && c <= 0xD7FF || c >= 0xE000 && c <= 0xFFFF) {
-      return Tuple2(String.fromCharCode(c), n);
+      return _Tuple2(String.fromCharCode(c), n);
     }
   } else if ((b & 0xF8) == 0xF0 && n >= 4) {
-    // 4-byte sequence
+    // 4-byte sequence.
     int c = ((b & 0x07) << 18) |
         ((slice[i + 1] & 0x3F) << 12) |
         ((slice[i + 2] & 0x3F) << 6) |
         (slice[i + 3] & 0x3F);
     if (c >= 0x10000 && c <= 0x10FFFF) {
-      return Tuple2(String.fromCharCode(c), n);
+      return _Tuple2(String.fromCharCode(c), n);
     }
   }
 
-  // Invalid sequence
-  return Tuple2(null, slice.length - i);
+  // Invalid sequence.
+  return _Tuple2(null, slice.length - i);
+}
+
+/// Pair of two values of potentially different types.
+class _Tuple2<A, B> {
+  const _Tuple2(this.i1, this.i2);
+
+  /// Item 1
+  final A i1;
+
+  /// Item 2
+  final B i2;
+
+  @override
+  String toString() => "Tuple2<$A, $B>($i1, $i2)";
 }

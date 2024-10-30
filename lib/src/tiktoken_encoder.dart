@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import 'package:tiktoken_tokenizer_gpt4o_o1/tiktoken_tokenizer_gpt4o_o1.dart';
 
 import 'common/byte_array.dart';
-import 'common/tuple2.dart';
 import 'core_bpe.dart';
 import 'error/tiktoken_error.dart';
 
@@ -117,9 +116,7 @@ class TiktokenEncoder {
   /// final enc = Tiktoken.getEncoderForModel(OpenAiModel.gpt_4);
   /// enc.encodeOrdinary("hello world");
   /// ```
-  Uint32List encodeOrdinary(String text) {
-    return _coreBPE.encodeOrdinaryNative(text);
-  }
+  Uint32List encodeOrdinary(String text) => _coreBPE.encodeOrdinaryNative(text);
 
   /// Encodes a string into stable tokens and possible completion sequences.
   ///
@@ -139,7 +136,7 @@ class TiktokenEncoder {
   /// assert(text.encode().startswith(enc.decode_bytes(stable_tokens)))
   /// assert all(enc.decode_bytes(stable_tokens + seq).startswith(text.encode()) for seq in completions)
   /// ```
-  Tuple2<List<int>, Set<List<int>>> encodeWithUnstable(
+  (List<int>, Set<List<int>>) encodeWithUnstable(
     String text, {
     SpecialTokensSet allowedSpecial = const SpecialTokensSet.empty(),
     SpecialTokensSet disallowedSpecial = const SpecialTokensSet.all(),
@@ -153,7 +150,8 @@ class TiktokenEncoder {
 
     _verifyDisallowed(text, disallowedSpecialSet);
 
-    return _coreBPE.encodeUnstableNative(text, allowedSpecialSet);
+    var tuple = _coreBPE.encodeUnstableNative(text, allowedSpecialSet);
+    return (tuple.i1, tuple.i2);
   }
 
   /// Encodes text corresponding to a single token to its token value.
@@ -194,11 +192,10 @@ class TiktokenEncoder {
   /// final enc = Tiktoken.getEncoderForModel(OpenAiModel.gpt_4);
   /// enc.decode([31373, 995]);
   /// ```
-  String decode(List<int> tokens, {bool allowMalformed = true}) {
-    return _coreBPE.decodeNative(tokens).asString(
-          allowMalformed: allowMalformed,
-        );
-  }
+  String decode(List<int> tokens, {bool allowMalformed = true}) =>
+      _coreBPE.decodeNative(tokens).asString(
+            allowMalformed: allowMalformed,
+          );
 
   /// Decodes a token into bytes.
   ///
@@ -211,9 +208,8 @@ class TiktokenEncoder {
   /// final enc = Tiktoken.getEncoderForModel(OpenAiModel.gpt_4);
   /// enc.decodeSingleTokenBytes(31373);
   /// ```
-  Uint8List decodeSingleTokenBytes(int token) {
-    return _coreBPE.decodeSingleTokenBytes(token).bytes;
-  }
+  Uint8List decodeSingleTokenBytes(int token) =>
+      _coreBPE.decodeSingleTokenBytes(token).bytes;
 
   /// Decodes a list of tokens into a list of bytes.
   ///
@@ -224,9 +220,8 @@ class TiktokenEncoder {
   /// final enc = Tiktoken.getEncoderForModel(OpenAiModel.gpt_4);
   /// enc.decodeTokenBytes([31373, 995]);
   /// ```
-  List<Uint8List> decodeTokenBytes(List<int> tokens) {
-    return tokens.map((token) => decodeSingleTokenBytes(token)).toList();
-  }
+  List<Uint8List> decodeTokenBytes(List<int> tokens) =>
+      tokens.map((token) => decodeSingleTokenBytes(token)).toList();
 
   int? get eotToken => specialTokens["<|endoftext|>"];
 

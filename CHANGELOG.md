@@ -4,4 +4,4 @@
 
 ## 1.0.0
 
-* Initial commit.
+* Supports: Gpt-4, Gpt-4o, Gpt-4o-mini, o1, o1-mini, and o1-preview.
