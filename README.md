@@ -156,6 +156,11 @@ _stackoverflow.com/users/3411681/marcg_</a>
 <a href="https://medium.com/@marcglasberg">_medium.com/@marcglasberg_</a>
 <br>
 
+*My article in the official Flutter documentation*:
+
+* <a href="https://flutter.dev/docs/development/ui/layout/constraints">Understanding
+  constraints</a>
+
 *The Flutter packages I've authored:*
 
 * <a href="https://pub.dev/packages/async_redux">async_redux</a>
@@ -190,8 +195,3 @@ _stackoverflow.com/users/3411681/marcg_</a>
   (versions: <a href="https://habr.com/ru/post/500210/">русский</a>)
 * <a href="https://medium.com/flutter-community/the-new-way-to-create-themes-in-your-flutter-app-7fdfc4f3df5f">
   The New Way to create Themes in your Flutter App</a> 
-
-*My article in the official Flutter documentation*:
-
-* <a href="https://flutter.dev/docs/development/ui/layout/constraints">Understanding
-  constraints</a>
