@@ -140,7 +140,7 @@ and made the API more user-friendly.
 
 ***
 
-<br>_Marcelo Glasberg:_<br>
+<br>By **Marcelo Glasberg**<br>
 
 <a href="https://glasberg.dev">_glasberg.dev_</a>
 <br>
