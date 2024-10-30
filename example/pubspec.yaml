@@ -1,0 +1,22 @@
+name: example
+description: "Example of using the tiktok tokenizer"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.5.4 <4.0.0'
+  flutter: ">=3.16.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  tiktoken_tokenizer_gpt4o_o1:
+    path: ../
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true

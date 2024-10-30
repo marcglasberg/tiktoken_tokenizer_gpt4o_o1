@@ -1,3 +1,5 @@
+[![](./example/SponsoredByMyTextAi.png)](https://mytext.ai)
+
 # Tiktoken
 
 This is a partial Dart port from the
@@ -13,6 +15,8 @@ For these OpenAI models:
 * o1
 * o1_mini
 * o1_preview
+
+![](./example/TiktokenExample.png)
 
 What's the Relationship Between Words and Tokens?
 Every language has a different word-to-token ratio. Here are a few general rules:
