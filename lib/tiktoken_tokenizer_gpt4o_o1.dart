@@ -7,7 +7,7 @@ export 'src/common/special_tokens_set.dart';
 export 'src/tiktoken_encoder.dart';
 export 'src/word_counter.dart';
 
-/// Supported Toktoken encodings.
+/// Supported Tiktoken encodings.
 enum TiktokenEncodingType {
   //
   // Encoder for Gpt-4.
@@ -15,6 +15,25 @@ enum TiktokenEncodingType {
   //
   // Encoder for Gpt-4o, ChatGpt-4o, Gpt-4o-mini and o1, o1-mini and o1-preview.
   o200k_base;
+
+  /// Returns the model from the given [name].
+  /// For example: `TiktokenEncodingType.from('cl100k_base')`
+  /// returns [TiktokenEncodingType.cl100k_base].
+  factory TiktokenEncodingType.from(String name) {
+    for (var encType in TiktokenEncodingType.values) {
+      if (encType.name == name) {
+        return encType;
+      }
+    }
+    throw ArgumentError('Unknown encoding type: $name');
+  }
+
+  /// Returns the encoding type from the given [json].
+  factory TiktokenEncodingType.fromJson(Map<String, Object?> json) =>
+      TiktokenEncodingType.from(json['name'] as String);
+
+  /// Returns the encoding type as a json object.
+  Map<String, Object?> toJson() => {'name': name};
 }
 
 /// Supported OpenAI models.
@@ -30,6 +49,24 @@ enum OpenAiModel {
   final TiktokenEncodingType encoding;
 
   const OpenAiModel(this.encoding);
+
+  /// Returns the model from the given [name].
+  /// For example: `OpenAiModel.from('gpt_4')` returns [OpenAiModel.gpt_4].
+  factory OpenAiModel.from(String name) {
+    for (var model in OpenAiModel.values) {
+      if (model.name == name) {
+        return model;
+      }
+    }
+    throw ArgumentError('Unknown model: $name');
+  }
+
+  /// Returns the model from the given [json].
+  factory OpenAiModel.fromJson(Map<String, Object?> json) =>
+      OpenAiModel.from(json['name'] as String);
+
+  /// Returns the model as a json object.
+  Map<String, Object?> toJson() => {'name': name};
 }
 
 /// Will encode, decode, and calculate the number of tokens in a text string.
