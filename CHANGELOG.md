@@ -2,9 +2,14 @@
 
 [![](./example/SponsoredByMyTextAi.png)](https://mytext.ai)
 
+## 1.2.0
+
+* Dart-only.
+
 ## 1.1.0
 
-* Enums `OpenAiModel` and `TiktokenEncodingType` now have `toJson` and `fromJson` methods.
+* Enums `OpenAiModel` and `TiktokenEncodingType` now have `toJson` and
+  `fromJson` methods.
 
 ## 1.0.2
 

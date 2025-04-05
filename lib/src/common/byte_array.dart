@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart';
+import 'utils.dart';
+
 
 /// Simple proxy for the Uint8List type.
 ///
