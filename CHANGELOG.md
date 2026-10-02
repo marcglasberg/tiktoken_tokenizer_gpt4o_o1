@@ -2,7 +2,7 @@
 
 [![](./example/SponsoredByMyTextAi.png)](https://mytext.ai)
 
-## 1.2.0
+## 1.2.1
 
 * Dart-only.
 

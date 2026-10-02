@@ -1,8 +1,8 @@
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:typed_data';
 
 import 'utils.dart';
-
 
 /// Simple proxy for the Uint8List type.
 ///
@@ -14,9 +14,11 @@ class ByteArray {
   ///Creates a [Uint8List] of the specified length (in elements), all of whose elements are initially zero.
   ByteArray(int length) : _bytes = Uint8List(length);
 
-  ByteArray.fromList(List<int> elements) : _bytes = Uint8List.fromList(elements);
+  ByteArray.fromList(List<int> elements)
+      : _bytes = Uint8List.fromList(elements);
 
-  ByteArray.fromString(String string) : _bytes = Uint8List.fromList(utf8.encode(string));
+  ByteArray.fromString(String string)
+      : _bytes = Uint8List.fromList(utf8.encode(string));
 
   /// Underlying [Uint8List] value
   final Uint8List _bytes;
