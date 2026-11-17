@@ -1,8 +1,8 @@
 * Sponsored by [MyText.ai](https://mytext.ai)
 
-[![](./example/SponsoredByMyTextAi.png)](https://mytext.ai)
+[![](./example/SponsoredByMyTextAi.jpg)](https://mytext.ai)
 
-## 1.2.1
+## 1.2.2
 
 * Dart-only.
 

@@ -1,4 +1,4 @@
-[![](./example/SponsoredByMyTextAi.png)](https://mytext.ai)
+[![](./example/SponsoredByMyTextAi.jpg)](https://mytext.ai)
 
 [![pub package](https://img.shields.io/pub/v/tiktoken_tokenizer_gpt4o_o1.svg)](https://pub.dev/packages/tiktoken_tokenizer_gpt4o_o1)
 
