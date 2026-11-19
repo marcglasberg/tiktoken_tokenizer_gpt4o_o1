@@ -48,7 +48,6 @@ class CoreBPEConstructor {
     required this.patternStr,
     required this.mergeableRanks,
     required this.specialTokens,
-    this.explicitNVocab,
   });
 
   static final Map<String, int> _cl100kBase = {};
@@ -209,5 +208,5 @@ class CoreBPEConstructor {
   final String patternStr;
   final Map<ByteArray, int> mergeableRanks;
   final Map<String, int> specialTokens;
-  final int? explicitNVocab;
+  final int? explicitNVocab = null;
 }

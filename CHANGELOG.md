@@ -2,6 +2,10 @@
 
 [![](./example/SponsoredByMyTextAi.jpg)](https://mytext.ai)
 
+## 1.2.3
+
+* Migrate the Flutter example to package:material_ui for Flutter 3.50. Keep the Dart library SDK constraint and byte-array equality compatible with older Dart versions.
+
 ## 1.2.2
 
 * Dart-only.
